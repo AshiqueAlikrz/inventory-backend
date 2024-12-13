@@ -27,7 +27,8 @@
     "reflect-metadata": "^0.2.2",
     "sequelize": "^6.37.3",
     "sequelize-cli": "^6.6.2",
-    "typeorm": "^0.3.20"
+    "typeorm": "^0.3.20",
+    "vercel": "^39.2.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
