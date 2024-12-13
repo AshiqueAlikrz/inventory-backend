@@ -1,13 +1,16 @@
 import { Router } from "express";
-import { createInvoice, getInvoices, getInvoiceById, updateInvoice, deleteInvoice, createService } from "./controller";
+import { createInvoice, createService, getInvoice, getInvoiceItems, getService } from "./controller";
 
 const router = Router();
 
 router.post("/createInvoice", createInvoice);
 router.post("/createService", createService);
-router.get("/getInvoice", getInvoices);
-router.get("/:id", getInvoiceById);
-router.put("/:id", updateInvoice);
-router.delete("/:id", deleteInvoice);
+router.get("/getInvoice", getInvoice);
+router.get("/getService", getService);
+router.get("/items/:invoiceId", getInvoiceItems);
+// router.get("/:id", getInvoiceById);
+// router.get("/:id", getInvoiceById);
+// router.put("/:id", updateInvoice);
+// router.delete("/:id", deleteInvoice);
 
 export { router };
