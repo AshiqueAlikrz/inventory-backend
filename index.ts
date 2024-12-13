@@ -6,7 +6,7 @@ import cors from "cors";
 const app: Express = express();
 
 // MongoDB Connection
-const mongoUri = "mongodb+srv://:WKssz08YogiTf7n2@cluster0.y2rdr.mongodb.net/alwahda_inventory"; // Replace 'your_database_name' with the actual database name you want to use
+const mongoUri = "mongodb+srv://ashiquealikrz9:WKssz08YogiTf7n2@cluster0.y2rdr.mongodb.net/alwahdainv?retryWrites=true&w=majority";
 mongoose.connect(mongoUri);
 
 const db = mongoose.connection;
