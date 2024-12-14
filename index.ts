@@ -18,7 +18,7 @@ const connectDB = async () => {
     console.log("Connected to MongoDB successfully");
   } catch (err) {
     console.error("MongoDB connection error:", err);
-    process.exit(1); // Exit the process if MongoDB connection fail 
+    process.exit(1); // Exit the process if MongoDB connection fail
   }
 };
 
@@ -30,6 +30,14 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
+
+app.get("/api/data", (req, res) => {
+  const data = {
+    message: "This is a sample response",
+    status: "success",
+  };
+});
+
 app.get("/", (req, res) => {
   res.send("Hello, working!");
 });
