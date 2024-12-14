@@ -1,9 +1,7 @@
-import express, { Express, Request, Response } from "express";
+import express, { Express } from "express";
 import mongoose from "mongoose";
 import { router as Report } from "./apps/report/route";
 import cors from "cors";
-import Invoice from "./apps/report/models/invoiceSchema";
-// import Invoice from "./models/Invoice"; // Ensure you have this model
 
 // Initialize Express app
 const app: Express = express();
@@ -20,7 +18,7 @@ const connectDB = async () => {
     console.log("Connected to MongoDB successfully");
   } catch (err) {
     console.error("MongoDB connection error:", err);
-    process.exit(1); // Exit the process if MongoDB connection fails
+    process.exit(1); // Exit the process if MongoDB connection fail 
   }
 };
 
@@ -32,16 +30,6 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-
-// Corrected /api/data route
-app.get("/api/data", async (req: Request, res: Response) => {
-  try {
-    const invoices = await Invoice.find(); // Fetching invoices from the database
-    res.status(200).json({ message: "Invoices fetched successfully", data: invoices });
-  } catch (err) {
-    res.status(500).json({ message: " Error fetching invoices", error: err });
-  }
-});
 
 app.get("/", (req, res) => {
   res.send("Hello, working!");
