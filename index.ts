@@ -7,7 +7,7 @@ import cors from "cors";
 const app: Express = express();
 
 // MongoDB Connection URI
-const mongoUri = "mongodb+srv://ashiquealikrz9:WKssz08YogiTf7n2@cluster0.y2rdr.mongodb.net/alwainvo?retryWrites=true&w=majority&appName=Cluster0";
+const mongoUri = "mongodb+srv://alwahdainventory:WKssz08YogiTf7n2@cluster0.y2rdr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 // const mongoUri = "mongodb://localhost:27017/alwahdainventory";
 
 // MongoDB Connection Function
