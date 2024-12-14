@@ -32,7 +32,7 @@ app.use(express.json());
 // Routes
 
 app.get("/", (req, res) => {
-  res.send("Hello, working!");
+  res.send("Hello, working!"); 
 });
 
 app.use("/api/reports", Report);
