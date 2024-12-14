@@ -15,6 +15,12 @@ const itemSchema = new Schema({
   quantity: {
     type: Number,
   },
+  tax: {
+    type: Number,
+  }, 
+  serviceCharge: {
+    type: Number,
+  },
   total: {
     type: Number,
   },
