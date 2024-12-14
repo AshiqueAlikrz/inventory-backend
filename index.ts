@@ -18,7 +18,7 @@ db.once("open", () => {
 // WKssz08YogiTf7n2
 
 app.get("/", (req, res) => {
-  console.log("  hello working");
+  res.send("  hello working");
 });
 
 app.use(cors());
