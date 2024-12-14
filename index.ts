@@ -2,6 +2,7 @@ import express, { Express } from "express";
 import mongoose from "mongoose";
 import { router as Report } from "./apps/report/route";
 import cors from "cors";
+import Invoice from "./apps/report/models/invoiceSchema";
 
 // Initialize Express app
 const app: Express = express();
@@ -31,12 +32,16 @@ app.use(express.json());
 
 // Routes
 
-app.get("/api/data", (req, res) => {
-  const data = {
-    message: "This is a sample response",
-    status: "success",
-  };
+
+app.get('/api/data', async (req: Request, res: Response) => {
+  try {
+    const invoices = await Invoice.find(); // Fetching invoices from the database
+    res.status(200).json({ message: 'Invoices fetched successfully', data: invoices });
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching invoices', error: err });
+  }
 });
+
 
 app.get("/", (req, res) => {
   res.send("Hello, working!");
