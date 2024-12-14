@@ -6,7 +6,7 @@ import cors from "cors";
 const app: Express = express();
 
 // MongoDB Connection
-const mongoUri = "mongodb+srv://ashiquealikrz9:WKssz08YogiTf7n2@cluster0.y2rdr.mongodb.net/alwahdainv?retryWrites=true&w=majority";
+const mongoUri = "mongodb+srv://ashiquealikrz9:WKssz08YogiTf7n2@cluster0.y2rdr.mongodb.net/alwainvo?retryWrites=true&w=majority&appName=Cluster0";
 mongoose.connect(mongoUri);
 
 const db = mongoose.connection;

@@ -1,16 +1,5 @@
 import { Router } from "express";
-import {
-  createInvoice,
-  createService,
-  getInvoice,
-  getInvoiceItems,
-  getService,
-  getInvoiceById,
-  getCustomerByName,
-  getFilterReport,
-  deleteInvoiceById,
-  updateInvoiceById,
-} from "./controller";
+import { createInvoice, createService, getInvoice, getInvoiceItems, getService, getInvoiceById, getCustomerByName, getFilterReport, deleteInvoiceById, updateInvoiceById } from "./controller";
 
 const router = Router();
 
