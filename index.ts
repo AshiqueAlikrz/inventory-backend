@@ -39,7 +39,7 @@ app.get("/api/data", async (req: Request, res: Response) => {
     const invoices = await Invoice.find(); // Fetching invoices from the database
     res.status(200).json({ message: "Invoices fetched successfully", data: invoices });
   } catch (err) {
-    res.status(500).json({ message: "Error fetching invoices", error: err });
+    res.status(500).json({ message: " Error fetching invoices", error: err });
   }
 });
 
