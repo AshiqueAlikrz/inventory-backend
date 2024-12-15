@@ -43,7 +43,7 @@ export const createService = async (req: Request, res: Response) => {
 
 export const getInvoice = async (req: Request, res: Response) => {
   try {
-    const invoices = await Invoice.find();
+    const invoices = await Invoice.find().sort({ invoice_number: -1 });
     res.status(200).json({ message: "Invoices fetched successfully", data: invoices });
   } catch (err) {
     throw err;
@@ -78,7 +78,7 @@ export const getInvoiceItems = async (req: Request, res: Response) => {
     });
   } catch (err) {
     throw err;
-  } 
+  }
 };
 
 export const getCustomerByName = async (req: Request, res: Response) => {
