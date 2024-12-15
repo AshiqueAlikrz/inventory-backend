@@ -11,7 +11,6 @@ dotenv.config();
 // MongoDB Connection URI from .env file
 const mongoUri = process.env.MONGODB_CONNECTION;
 
-
 // MongoDB Connection Function
 const connectDB = async () => {
   try {

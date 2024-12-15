@@ -78,7 +78,7 @@ export const getInvoiceItems = async (req: Request, res: Response) => {
     });
   } catch (err) {
     throw err;
-  }
+  } 
 };
 
 export const getCustomerByName = async (req: Request, res: Response) => {
