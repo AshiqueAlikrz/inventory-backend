@@ -21,7 +21,7 @@ export const createInvoice = async (req: Request, res: Response) => {
       invoice_number: invoiceNumber,
     };
     const newInvoice = new Invoice(newInvoiceData);
-    const savedInvoice = await newInvoice.save();
+    const savedInvoice = await newInvoice.save(); 
     res.status(201).json({
       message: isNewCustomer ? "Invoice created and new customer added successfully" : "Invoice created successfully",
       data: savedInvoice,
