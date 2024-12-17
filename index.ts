@@ -26,7 +26,7 @@ const connectDB = async () => {
 connectDB();
 
 // Middleware
-app.use(cors());
+app.use(cors()); 
 app.use(express.json());
 
 // Routes
