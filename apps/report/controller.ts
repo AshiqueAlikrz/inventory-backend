@@ -127,7 +127,7 @@ export const getFilterReport = async (req: Request, res: Response) => {
     console.error("Error retrieving filter report:", err);
     res.status(500).json({ message: "Internal server error", error: err });
   }
-};
+}; 
 
 export const deleteInvoiceById = async (req: Request, res: Response) => {
   try {
