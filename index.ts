@@ -9,8 +9,8 @@ const app: Express = express();
 dotenv.config();
 
 // MongoDB Connection URI from .env file
-// const mongoUri = process.env.MONGODB_CONNECTION;
-const mongoUri = "mongodb+srv://alwahdainventory:os2lyxguGsSvcajZ@cluster0.y2rdr.mongodb.net/alwahda2025?retryWrites=true&w=majority&appName=Cluster0";
+const mongoUri = process.env.MONGODB_CONNECTION;
+// const mongoUri = "mongodb+srv://alwahdainventory:os2lyxguGsSvcajZ@cluster0.y2rdr.mongodb.net/alwahda2025?retryWrites=true&w=majority&appName=Cluster0";
 
 // MongoDB Connection Function
 const connectDB = async () => {
