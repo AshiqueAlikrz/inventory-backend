@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-// Define the schema for individual items in the invoice
 const itemSchema = new Schema({
   id: {
     type: Number,
@@ -23,7 +22,7 @@ const itemSchema = new Schema({
   },
   total: {
     type: Number,
-  },
+  }, 
 });
 
 // Define the invoice schema

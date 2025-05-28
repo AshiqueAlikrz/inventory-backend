@@ -14,9 +14,12 @@ const app: Express = express();
 // MongoDB Connection URI from .env file
 const mongoUri = process.env.MONGODB_CONNECTION;
 
+
 // Check if MongoDB URI exists
 if (!mongoUri) {
-  throw new Error("MongoDB connection URI is missing from the environment variables");
+  throw new Error(
+    "MongoDB connection URI is missing from the environment variables"
+  );
 }
 
 // MongoDB Connection Function

@@ -11,6 +11,8 @@ import {
   deleteInvoiceById,
   updateInvoiceById,
   getLastInvoice,
+  getDailyReports,
+  getMonthlyReports,
 } from "./controller";
 
 const router = Router();
@@ -26,6 +28,8 @@ router.get("/filterReport", getFilterReport);
 router.delete("/invoice/:invoiceId", deleteInvoiceById);
 router.put("/invoice/:invoiceId", updateInvoiceById);
 router.get("/lastReport", getLastInvoice);
+router.get("/dailyreports", getDailyReports);
+router.get("/monthlyreports", getMonthlyReports);
 // router.get("/:id", getInvoiceById);
 // router.get("/:id", getInvoiceById);
 // router.put("/:id", updateInvoice);

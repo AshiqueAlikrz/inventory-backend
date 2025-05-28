@@ -1,7 +1,8 @@
-import { Request, Response } from "express";
+import { Request, response, Response } from "express";
 import Invoice from "./models/invoiceSchema";
 import Service from "./models/serviceSchema";
 import Customer from "./models/customerSchema";
+import { dailyReportsDB, montlyReportDB } from "./service";
 
 export const createInvoice = async (req: Request, res: Response) => {
   try {
@@ -23,7 +24,9 @@ export const createInvoice = async (req: Request, res: Response) => {
     const newInvoice = new Invoice(newInvoiceData);
     const savedInvoice = await newInvoice.save();
     res.status(201).json({
-      message: isNewCustomer ? "Invoice created and new customer added successfully" : "Invoice created successfully",
+      message: isNewCustomer
+        ? "Invoice created and new customer added successfully"
+        : "Invoice created successfully",
       data: savedInvoice,
     });
   } catch (error) {
@@ -35,7 +38,9 @@ export const createService = async (req: Request, res: Response) => {
   try {
     const newService = new Service(req.body);
     const savedService = await newService.save();
-    res.status(201).json({ message: "Service created  successfully", data: savedService });
+    res
+      .status(201)
+      .json({ message: "Service created  successfully", data: savedService });
   } catch (err) {
     throw err;
   }
@@ -44,7 +49,9 @@ export const createService = async (req: Request, res: Response) => {
 export const getInvoice = async (req: Request, res: Response) => {
   try {
     const invoices = await Invoice.find().sort({ invoice_number: -1 });
-    res.status(200).json({ message: "Invoices fetched successfully", data: invoices });
+    res
+      .status(200)
+      .json({ message: "Invoices fetched successfully", data: invoices });
   } catch (err) {
     throw err;
   }
@@ -52,7 +59,9 @@ export const getInvoice = async (req: Request, res: Response) => {
 export const getService = async (req: Request, res: Response) => {
   try {
     const Services = await Service.find();
-    res.status(200).json({ message: "sevices fetched successfully", data: Services });
+    res
+      .status(200)
+      .json({ message: "sevices fetched successfully", data: Services });
   } catch (err) {
     throw err;
   }
@@ -61,8 +70,13 @@ export const getService = async (req: Request, res: Response) => {
 export const getInvoiceById = async (req: Request, res: Response) => {
   try {
     const invoiceId = req.params.invoiceId;
-    const invoice = await Invoice.findById(invoiceId).populate("items.description");
-    res.status(200).json({ message: "invoice items fetched successfully", data: invoice });
+    console.log("invoiceId", invoiceId);
+    const invoice = await Invoice.findById(invoiceId).populate(
+      "items.description"
+    );
+    res
+      .status(200)
+      .json({ message: "invoice items fetched successfully", data: invoice });
   } catch (err) {
     throw err;
   }
@@ -71,7 +85,9 @@ export const getInvoiceById = async (req: Request, res: Response) => {
 export const getInvoiceItems = async (req: Request, res: Response) => {
   try {
     const invoiceId = req.params.invoiceId;
-    const invoice = await Invoice.findById(invoiceId).populate("items.description");
+    const invoice = await Invoice.findById(invoiceId).populate(
+      "items.description"
+    );
     res.status(200).json({
       message: "invoice items fetched successfully",
       data: invoice?.items,
@@ -151,7 +167,9 @@ export const updateInvoiceById = async (req: Request, res: Response) => {
       new: true,
     });
     if (updateInvoice) {
-      return res.status(200).json({ message: "invoice updated successfully", data: updateInvoice });
+      return res
+        .status(200)
+        .json({ message: "invoice updated successfully", data: updateInvoice });
     }
   } catch (err) {
     res.status(500).json({ message: "Internal server error", error: err });
@@ -160,8 +178,44 @@ export const updateInvoiceById = async (req: Request, res: Response) => {
 
 export const getLastInvoice = async (req: Request, res: Response) => {
   try {
-    const lastInvoice = await Invoice.findOne().sort({ invoice_number: -1 }).populate("items.description");
-    res.status(200).json({ message: "Last invoice fetched successfully", data: lastInvoice });
+    const lastInvoice = await Invoice.findOne()
+      .sort({ invoice_number: -1 })
+      .populate("items.description");
+    res.status(200).json({
+      message: "Last invoice fetched successfully",
+      data: lastInvoice,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const getDailyReports = async (req: Request, res: Response) => {
+  try {
+    const filter = req.body;
+
+    const response = await dailyReportsDB(filter);
+
+    res.status(200).json({
+      message: " Daily Report fetched successfully",
+      data: response,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+
+export const getMonthlyReports = async (req: Request, res: Response) => {
+  try {
+    const filter = req.body;
+
+    const response = await montlyReportDB(filter);
+
+    res.status(200).json({
+      message: " Monthly Report fetched successfully",
+      data: response,
+    });
   } catch (err) {
     res.status(500).json({ message: "Internal server error", error: err });
   }
