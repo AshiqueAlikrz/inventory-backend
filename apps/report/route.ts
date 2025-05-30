@@ -13,6 +13,7 @@ import {
   getLastInvoice,
   getDailyReports,
   getMonthlyReports,
+  getTodayReports,
 } from "./controller";
 
 const router = Router();
@@ -30,9 +31,10 @@ router.put("/invoice/:invoiceId", updateInvoiceById);
 router.get("/lastReport", getLastInvoice);
 router.get("/dailyreports", getDailyReports);
 router.get("/monthlyreports", getMonthlyReports);
+router.get("/dashboardreports", getTodayReports);
 // router.get("/:id", getInvoiceById);
 // router.get("/:id", getInvoiceById);
 // router.put("/:id", updateInvoice);
-// router.delete("/:id", deleteInvoice);  
+// router.delete("/:id", deleteInvoice);
 
-export { router }; 
+export { router };

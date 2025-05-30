@@ -1,3 +1,4 @@
+import Customer from "./models/customerSchema";
 import Invoice from "./models/invoiceSchema";
 
 export const dailyReportsDB = async (req: any) => {
@@ -68,7 +69,7 @@ export const montlyReportDB = async (req: any) => {
           $subtract: ["$items.serviceCharge", "$items.tax"],
         },
         discount: "$discount",
-        grand_total: "$grand_total", 
+        grand_total: "$grand_total",
       },
     },
 
@@ -99,3 +100,59 @@ export const montlyReportDB = async (req: any) => {
 
   return result;
 };
+
+export const getTodayReportsDB = async () => {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+
+  const endOfToday = new Date();
+  endOfToday.setHours(23, 59, 59, 999);
+
+  const TotalUsers = await Customer.countDocuments();
+
+  const todayReport = await Invoice.aggregate([
+    {
+      $match: {
+        date: {
+          $gte: startOfToday,
+          $lte: endOfToday,
+        },
+      },
+    },
+    { $unwind: "$items" },
+
+    {
+      $project: {
+        date: "$date",
+        profit: {
+          $subtract: ["$items.serviceCharge", "$items.tax"],
+        },
+        discount: "$discount",
+        grand_total: "$grand_total",
+      },
+    },
+
+    // 3. Group by year and month
+    {
+      $group: {
+        _id: "$date",
+        totalProfit: { $sum: "$profit" },
+        totalDiscount: { $sum: "$discount" },
+        totalExpense: { $sum: "$grand_total" },
+      },
+    },
+
+    // 4. Final projection to format output
+    {
+      $project: {
+        _id: 0,
+        date: "$_id",
+        profit: { $subtract: ["$totalProfit", "$totalDiscount"] },
+        expense: "$totalExpense",
+      },
+    },
+  ]);
+
+  console.log("todayReport", todayReport);
+  console.log("TotalUsers", TotalUsers);
+}; 

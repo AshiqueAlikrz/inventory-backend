@@ -2,7 +2,7 @@ import { Request, response, Response } from "express";
 import Invoice from "./models/invoiceSchema";
 import Service from "./models/serviceSchema";
 import Customer from "./models/customerSchema";
-import { dailyReportsDB, montlyReportDB } from "./service";
+import { dailyReportsDB, getTodayReportsDB, montlyReportDB } from "./service";
 
 export const createInvoice = async (req: Request, res: Response) => {
   try {
@@ -205,7 +205,6 @@ export const getDailyReports = async (req: Request, res: Response) => {
   }
 };
 
-
 export const getMonthlyReports = async (req: Request, res: Response) => {
   try {
     const filter = req.body;
@@ -220,3 +219,18 @@ export const getMonthlyReports = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error", error: err });
   }
 };
+
+export const getTodayReports = async (req: Request, res: Response) => {
+  try {
+    const filter = req.body;
+    const response = await getTodayReportsDB();
+
+    res.status(200).json({
+      message: " Monthly Report fetched successfully",
+      data: response,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+  
