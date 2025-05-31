@@ -5,7 +5,7 @@ const ServiceSchema = new Schema({
     type: String,
     required: true,
   },
-  price: {  
+  price: {
     type: Number,
     required: true,
   },
@@ -13,4 +13,4 @@ const ServiceSchema = new Schema({
 
 const Service = mongoose.model("Service", ServiceSchema);
 
-export default Service;
+export default Service; 

@@ -14,6 +14,8 @@ const app: Express = express();
 // MongoDB Connection URI from .env file
 const mongoUri = process.env.MONGODB_CONNECTION;
 
+console.log(mongoUri)
+  
 
 // Check if MongoDB URI exists
 if (!mongoUri) {
@@ -42,12 +44,12 @@ app.use(cors()); // Enable Cross-Origin Resource Sharing
 app.use(express.json()); // Parse incoming JSON requests
 
 // Routes
-app.get("/", (req, res) => {
+app.get("/", (req, res) => {  
   res.send("Hello!");
 });
 
 app.use("/api/reports", Report);
-
+  
 // Start the server
 const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {

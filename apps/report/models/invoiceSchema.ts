@@ -16,13 +16,16 @@ const itemSchema = new Schema({
   },
   tax: {
     type: Number,
-  }, 
+  },
   serviceCharge: {
     type: Number,
   },
   total: {
     type: Number,
-  }, 
+  },
+  vat: {
+    type: Boolean,
+  },
 });
 
 // Define the invoice schema

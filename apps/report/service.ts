@@ -108,17 +108,17 @@ export const getTodayReportsDB = async () => {
   const endOfToday = new Date();
   endOfToday.setHours(23, 59, 59, 999);
 
-  const TotalUsers = await Customer.countDocuments();
+  const totalUsers = await Customer.countDocuments();
 
   const todayReport = await Invoice.aggregate([
-    {
-      $match: {
-        date: {
-          $gte: startOfToday,
-          $lte: endOfToday,
-        },
-      },
-    },
+    // {
+    //   $match: {
+    //     date: {
+    //       $gte: startOfToday,
+    //       $lte: endOfToday,
+    //     },
+    //   },
+    // },
     { $unwind: "$items" },
 
     {
@@ -126,13 +126,12 @@ export const getTodayReportsDB = async () => {
         date: "$date",
         profit: {
           $subtract: ["$items.serviceCharge", "$items.tax"],
-        },
+        }, 
         discount: "$discount",
-        grand_total: "$grand_total",
+        grand_total: "$grand_total", 
       },
     },
 
-    // 3. Group by year and month
     {
       $group: {
         _id: "$date",
@@ -141,18 +140,26 @@ export const getTodayReportsDB = async () => {
         totalExpense: { $sum: "$grand_total" },
       },
     },
-
-    // 4. Final projection to format output
     {
       $project: {
         _id: 0,
-        date: "$_id",
+        // date: "$_id",
         profit: { $subtract: ["$totalProfit", "$totalDiscount"] },
         expense: "$totalExpense",
       },
     },
   ]);
+  console.log(todayReport)
+  return { todayReport,  totalUsers };
+  // console.log(todayReport);
+};
 
-  console.log("todayReport", todayReport);
-  console.log("TotalUsers", TotalUsers);
-}; 
+export const editInvoiceDB = async (invoiceId: string, itemId: string, data: any) => {
+  const invoice = await Invoice.findById(invoiceId).populate("items");
+  if (!invoice) throw new Error("No invoice found");
+  const item = invoice.items.find((item) => item._id.equals(itemId));
+  if (!item) throw new Error("Item not found in invoice");
+  item.serviceCharge = data.serviceCharge;
+  item.tax = data.tax;
+  await invoice.save();
+};
