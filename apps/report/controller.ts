@@ -2,27 +2,45 @@ import { Request, response, Response } from "express";
 import Invoice from "./models/invoiceSchema";
 import Service from "./models/serviceSchema";
 import Customer from "./models/customerSchema";
-import { dailyReportsDB, editInvoiceDB, getTodayReportsDB, montlyReportDB } from "./service";
+import { dailyReportsDB, editInvoiceDB, editInvoiceDetailsDB, getTodayReportsDB, montlyReportDB } from "./services/service";
 
 export const createInvoice = async (req: Request, res: Response) => {
   try {
     const invoiceData = req.body;
+    console.log("invoiceData", invoiceData);
+
+    // Generate the next invoice number
     const lastInvoice = await Invoice.findOne().sort({ invoice_number: -1 });
     const invoiceNumber = (lastInvoice?.invoice_number ?? 0) + 1;
 
-    let customer = await Customer.findOne({ name: invoiceData.name });
-    let isNewCustomer = false;
-    if (!customer) {
-      customer = new Customer({ name: invoiceData.name });
-      await customer.save();
-      isNewCustomer = true;
-    }
+    // Create and save the invoice first
     const newInvoiceData = {
       ...invoiceData,
       invoice_number: invoiceNumber,
     };
+
     const newInvoice = new Invoice(newInvoiceData);
     const savedInvoice = await newInvoice.save();
+
+    // Find or create customer
+    let customer = await Customer.findOne({ name: invoiceData.name });
+    let isNewCustomer = false;
+
+    if (!customer) {
+      // New customer with this invoice
+      customer = new Customer({
+        name: invoiceData.name,
+        products: [savedInvoice._id],
+      });
+      await customer.save();
+      isNewCustomer = true;
+    } else {
+      // Existing customer: add invoice reference
+      customer.products.push(savedInvoice._id);
+      await customer.save();
+    }
+
+    // Response
     res.status(201).json({
       message: isNewCustomer ? "Invoice created and new customer added successfully" : "Invoice created successfully",
       data: savedInvoice,
@@ -215,17 +233,31 @@ export const getTodayReports = async (req: Request, res: Response) => {
   }
 };
 
-export const editInvoice = async (req: Request, res: Response) => {
+export const editInvoiceItems = async (req: Request, res: Response) => {
   try {
     const data = req.body;
     const invoiceId = req.params.invoiceId;
     const itemId = req.params.itemId;
-    // console.log(data, invoiceId, itemId);
-    const response = await editInvoiceDB(invoiceId, itemId, data);
+    console.log(data, invoiceId, itemId);
+    await editInvoiceDB(invoiceId, itemId, data);
+    res.status(200).json({
+      message: "Invoice items updated successfully",
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
 
+export const editInvoiceDetails = async (req: Request, res: Response) => {
+  try {
+    // console.log("hiiiii");
+    const data = req.body;
+    const invoiceId = req.params.invoiceId;
+    // const itemId = req.params.itemId;
+    console.log(data, invoiceId);
+    const response = await editInvoiceDetailsDB(invoiceId, data);
     res.status(200).json({
       message: "Invoice updated successfully",
-      // data: response,
     });
   } catch (err) {
     res.status(500).json({ message: "Internal server error", error: err });

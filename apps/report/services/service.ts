@@ -1,5 +1,5 @@
-import Customer from "./models/customerSchema";
-import Invoice from "./models/invoiceSchema";
+import Customer from "../models/customerSchema";
+import Invoice from "../models/invoiceSchema";
 
 export const dailyReportsDB = async (req: any) => {
   const result = await Invoice.aggregate([
@@ -126,9 +126,9 @@ export const getTodayReportsDB = async () => {
         date: "$date",
         profit: {
           $subtract: ["$items.serviceCharge", "$items.tax"],
-        }, 
+        },
         discount: "$discount",
-        grand_total: "$grand_total", 
+        grand_total: "$grand_total",
       },
     },
 
@@ -149,9 +149,7 @@ export const getTodayReportsDB = async () => {
       },
     },
   ]);
-  console.log(todayReport)
-  return { todayReport,  totalUsers };
-  // console.log(todayReport);
+  return { todayReport, totalUsers };
 };
 
 export const editInvoiceDB = async (invoiceId: string, itemId: string, data: any) => {
@@ -160,6 +158,20 @@ export const editInvoiceDB = async (invoiceId: string, itemId: string, data: any
   const item = invoice.items.find((item) => item._id.equals(itemId));
   if (!item) throw new Error("Item not found in invoice");
   item.serviceCharge = data.serviceCharge;
-  item.tax = data.tax;
+  item.tax = data.tax ? data.tax : 0;
+  item.rate = data.rate;
+  item.quantity = data.quantity;
+  item.total = data.quantity * data.rate;
+  invoice.sub_total = invoice.items.reduce((acc: number, curr: any) => {
+    return acc + (curr.total ? curr.total : 0);
+  }, 0);
+  invoice.grand_total = invoice.sub_total ? invoice.sub_total - invoice.discount : 0;
+  await invoice.save();
+};
+
+export const editInvoiceDetailsDB = async (invoiceId: string, data: any) => {
+  const invoice = await Invoice.findById(invoiceId);
+  if (!invoice) throw new Error("Invoice not found ");
+  await invoice.updateOne({ ...data, grand_total: invoice.sub_total ? invoice.sub_total - data.discount : 0 });
   await invoice.save();
 };

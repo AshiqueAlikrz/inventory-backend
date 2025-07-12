@@ -14,7 +14,8 @@ import {
   getDailyReports,
   getMonthlyReports,
   getTodayReports,
-  editInvoice,
+  editInvoiceItems,
+  editInvoiceDetails,
 } from "./controller";
 
 const router = Router();
@@ -24,7 +25,7 @@ router.post("/createService", createService);
 router.get("/getInvoice", getInvoice);
 router.get("/getService", getService);
 router.get("/items/:invoiceId", getInvoiceItems);
-router.get("/invoice/:invoiceId", getInvoiceById );
+router.get("/invoice/:invoiceId", getInvoiceById);
 router.get("/getCustomer", getCustomerByName);
 router.get("/filterReport", getFilterReport);
 router.delete("/invoice/:invoiceId", deleteInvoiceById);
@@ -33,10 +34,11 @@ router.get("/lastReport", getLastInvoice);
 router.get("/dailyreports", getDailyReports);
 router.get("/monthlyreports", getMonthlyReports);
 router.get("/dashboardreports", getTodayReports);
-router.put("/editinvoice/:invoiceId/item/:itemId", editInvoice);
-// router.get("/:id", getInvoiceById);  
+router.put("/editinvoice/:invoiceId/item/:itemId", editInvoiceItems);
+router.patch("/editinvoice/:invoiceId", editInvoiceDetails);
 // router.get("/:id", getInvoiceById);
-// router.put("/:id", updateInvoice); 
+// router.get("/:id", getInvoiceById);
+// router.put("/:id", updateInvoice);
 // router.delete("/:id", deleteInvoice);
 
 export { router };
