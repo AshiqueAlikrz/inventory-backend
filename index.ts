@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 import { router as Report } from "./apps/report/route";
+import { MongoClient, ServerApiVersion } from "mongodb";
 
 dotenv.config();
 
@@ -42,8 +43,6 @@ const PORT = process.env.PORT || 8081;
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
-
-import { MongoClient, ServerApiVersion } from "mongodb";
 
 const mongoClient = new MongoClient(mongoUri, {
   serverApi: {
