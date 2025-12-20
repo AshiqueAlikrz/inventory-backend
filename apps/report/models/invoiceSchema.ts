@@ -48,6 +48,9 @@ const invoiceSchema = new Schema({
   grand_total: {
     type: Number,
   },
+  total_vat: {
+    type: Number,
+  },
   discount: {
     type: Number,
     default: 0, // Default discount is 0 if not provided
