@@ -5,7 +5,7 @@ const itemSchema = new Schema({
     type: Number,
   },
   description: {
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     ref: "Service",
   },
   rate: {
@@ -33,6 +33,11 @@ const invoiceSchema = new Schema({
   name: {
     type: String,
   },
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
+    // required: true,
+  },
   date: {
     type: Date,
   },
@@ -42,13 +47,19 @@ const invoiceSchema = new Schema({
   items: {
     type: [itemSchema],
   },
-  sub_total: {
+  subTotal: {
     type: Number,
   },
-  grand_total: {
+  grandTotal: {
     type: Number,
   },
-  total_vat: {
+  totalVat: {
+    type: Number,
+  },
+  vatPaidByCompany: {
+    type: Boolean,
+  },
+  profit: {
     type: Number,
   },
   discount: {

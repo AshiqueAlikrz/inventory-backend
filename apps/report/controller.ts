@@ -194,7 +194,7 @@ export const getDailyReports = async (req: Request, res: Response) => {
   try {
     const filter = req.body;
 
-    const response = await dailyReportsDB(filter);
+    const response = await dailyReportsDB();
 
     res.status(200).json({
       message: " Daily Report fetched successfully",
@@ -223,9 +223,8 @@ export const getMonthlyReports = async (req: Request, res: Response) => {
 export const getTodayReports = async (req: Request, res: Response) => {
   try {
     const response = await getTodayReportsDB();
-
     res.status(200).json({
-      message: " Dashboard report fetched successfully",
+      message: "Dashboard report fetched successfully",
       data: response,
     });
   } catch (err) {
@@ -259,6 +258,35 @@ export const editInvoiceDetails = async (req: Request, res: Response) => {
     res.status(200).json({
       message: "Invoice updated successfully",
     });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const updateService = async (req: Request, res: Response) => {
+  try {
+    const serviceId = req.params.serviceId;
+    const body = req.body;
+    const updateService = await Service.findByIdAndUpdate(serviceId, body, {
+      new: true,
+    });
+    if (updateService) {
+      return res.status(200).json({ message: "Service updated successfully", data: updateService });
+    }
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const deleteService = async (req: Request, res: Response) => {
+  try {
+    const serviceId = req.params.serviceId;
+    if (serviceId) {
+      await Service.findByIdAndDelete(serviceId);
+      res.status(200).json({ message: "Service deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Service Not found" });
+    }
   } catch (err) {
     res.status(500).json({ message: "Internal server error", error: err });
   }

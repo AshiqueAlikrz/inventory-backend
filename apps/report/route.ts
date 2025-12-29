@@ -16,6 +16,8 @@ import {
   getTodayReports,
   editInvoiceItems,
   editInvoiceDetails,
+  updateService,
+  deleteService,
 } from "./controller";
 
 const router = Router();
@@ -36,6 +38,8 @@ router.get("/monthlyreports", getMonthlyReports);
 router.get("/dashboardreports", getTodayReports);
 router.put("/editinvoice/:invoiceId/item/:itemId", editInvoiceItems);
 router.patch("/editinvoice/:invoiceId", editInvoiceDetails);
+router.patch("/editservice/:serviceId", updateService);
+router.delete("/deleteservice/:serviceId", deleteService);
 // router.get("/:id", getInvoiceById);
 // router.get("/:id", getInvoiceById);
 // router.put("/:id", updateInvoice);

@@ -1,150 +1,126 @@
+import { validationResult } from "express-validator";
 import Customer from "../models/customerSchema";
+import DailyReport from "../models/dailyReportSchema";
 import Invoice from "../models/invoiceSchema";
+import MonthlyReport from "../models/montlyReportSchema";
 
-export const dailyReportsDB = async (req: any) => {
-  const result = await Invoice.aggregate([
-    {
-      $unwind: "$items",
-    },
-    {
-      $project: {
-        date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
-        invoiceId: "$_id",
-        itemProfit: { $subtract: ["$items.serviceCharge", "$items.tax"] },
-        expense: { $subtract: ["$items.serviceCharge", "$items.tax"] },
-        discount: 1,
-        grand_total: 1,
+export const dailyReportsDB = async () => {
+  try {
+    const aggregatedData = await Invoice.aggregate([
+      {
+        $project: {
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+          profit: 1,
+          expense: "$grandTotal",
+          vat: "$totalVat",
+          discount: "$discount",
+        },
       },
-    },
-    {
-      $group: {
-        _id: { invoiceId: "$invoiceId", date: "$date" },
-        totalItemProfit: { $sum: "$itemProfit" },
-        discount: { $first: "$discount" },
-        expense: { $first: "$grand_total" },
-        date: { $first: "$date" },
+      {
+        $group: {
+          _id: "$date",
+          totalProfit: { $sum: "$profit" }, // sum invoice-level profit
+          totalExpense: { $sum: "$expense" }, // sum grandTotal as expense
+          totalVat: { $sum: "$vat" }, // sum grandTotal as expense
+          totalDiscount: { $sum: "$discount" }, // sum grandTotal as expense
+        },
       },
-    },
-    {
-      $project: {
-        date: 1,
-        netProfit: { $subtract: ["$totalItemProfit", "$discount"] },
-        totalExpense: { $subtract: ["$expense", "$discount"] },
+      {
+        $project: {
+          _id: 0,
+          date: "$_id",
+          profit: "$totalProfit",
+          expense: "$totalExpense",
+          vat: "$totalVat",
+          discount: "$totalDiscount",
+        },
       },
-    },
-    {
-      $group: {
-        _id: "$date",
-        totalProfit: { $sum: "$netProfit" },
-        expense: { $sum: "$totalExpense" },
-      },
-    },
-    {
-      $project: {
-        _id: 0,
-        date: "$_id",
-        profit: "$totalProfit",
-        expense: "$expense",
-      },
-    },
-    {
-      $sort: { date: -1 },
-    },
-  ]);
+      { $sort: { date: -1 } },
+    ]);
 
-  return result;
+    const savePromises = aggregatedData.map((record) =>
+      DailyReport.findOneAndUpdate(
+        { date: record.date }, // update if exists
+        { expense: record.expense, profit: record.profit, vat: record.vat, discount: record.discount },
+        { upsert: true, new: true }
+      )
+    );
+
+    const reports = await Promise.all(savePromises);
+    return reports;
+  } catch (error) {
+    console.error("Error generating daily reports:", error);
+    throw error;
+  }
 };
 
 export const montlyReportDB = async (req: any) => {
-  const result = await Invoice.aggregate([
-    // 1. Unwind items to calculate per-item profit
-    { $unwind: "$items" },
-
-    // 2. Project necessary fields: year, month, and profit
+  const monthlyReportAggregation = await DailyReport.aggregate([
     {
       $project: {
         year: { $year: "$date" },
         month: { $month: "$date" },
-        profit: {
-          $subtract: ["$items.serviceCharge", "$items.tax"],
-        },
         discount: "$discount",
-        grand_total: "$grand_total",
+        profit: "$profit",
+        vat: "$vat",
+        expense: "$expense",
       },
     },
-
-    // 3. Group by year and month
     {
       $group: {
         _id: { year: "$year", month: "$month" },
         totalProfit: { $sum: "$profit" },
         totalDiscount: { $sum: "$discount" },
-        totalExpense: { $sum: "$grand_total" },
+        totalExpense: { $sum: "$expense" },
+        totalVat: { $sum: "$vat" },
+        expense: { $sum: "$vat" },
       },
     },
-
-    // 4. Final projection to format output
     {
       $project: {
         _id: 0,
         year: "$_id.year",
         month: "$_id.month",
-        profit: { $subtract: ["$totalProfit", "$totalDiscount"] },
+        profit: "$totalProfit",
         expense: "$totalExpense",
+        discount: "$totalDiscount",
+        vat: "$totalVat",
       },
     },
-
-    // 5. Sort by year and month
     { $sort: { year: 1, month: 1 } },
   ]);
 
-  return result;
+  const savePromises = monthlyReportAggregation.map((record) =>
+    MonthlyReport.findOneAndUpdate(
+      { month: record.month, year: record.year }, // update if exists
+      { expense: record.expense, profit: record.profit, vat: record.vat, discount: record.discount },
+      { upsert: true, new: true }
+    )
+  );
+  const reports = await Promise.all(savePromises);
+  return reports;
 };
 
 export const getTodayReportsDB = async () => {
-  const startOfToday = new Date();
-  startOfToday.setHours(0, 0, 0, 0);
-
-  const endOfToday = new Date();
-  endOfToday.setHours(23, 59, 59, 999);
-
   const totalUsers = await Customer.countDocuments();
-
-  const todayReport = await Invoice.aggregate([
-    // {
-    //   $match: {
-    //     date: {
-    //       $gte: startOfToday,
-    //       $lte: endOfToday,
-    //     },
-    //   },
-    // },
-    { $unwind: "$items" },
-
+  const todayReport = await MonthlyReport.aggregate([
     {
       $project: {
-        date: "$date",
-        profit: {
-          $subtract: ["$items.serviceCharge", "$items.tax"],
-        },
-        discount: "$discount",
-        grand_total: "$grand_total",
+        _id: "_id",
+        expense: "$expense",
+        profit: "$profit",
       },
     },
-
     {
       $group: {
-        _id: "$date",
+        _id: "_id",
         totalProfit: { $sum: "$profit" },
-        totalDiscount: { $sum: "$discount" },
-        totalExpense: { $sum: "$grand_total" },
+        totalExpense: { $sum: "$expense" },
       },
     },
     {
       $project: {
-        _id: 0,
-        // date: "$_id",
-        profit: { $subtract: ["$totalProfit", "$totalDiscount"] },
+        profit: "$totalProfit",
         expense: "$totalExpense",
       },
     },
@@ -162,16 +138,16 @@ export const editInvoiceDB = async (invoiceId: string, itemId: string, data: any
   item.rate = data.rate;
   item.quantity = data.quantity;
   item.total = data.quantity * data.rate;
-  invoice.sub_total = invoice.items.reduce((acc: number, curr: any) => {
+  invoice.subTotal = invoice.items.reduce((acc: number, curr: any) => {
     return acc + (curr.total ? curr.total : 0);
   }, 0);
-  invoice.grand_total = invoice.sub_total ? invoice.sub_total - invoice.discount : 0;
+  invoice.grandTotal = invoice.subTotal ? invoice.subTotal - invoice.discount : 0;
   await invoice.save();
 };
 
 export const editInvoiceDetailsDB = async (invoiceId: string, data: any) => {
   const invoice = await Invoice.findById(invoiceId);
   if (!invoice) throw new Error("Invoice not found ");
-  await invoice.updateOne({ ...data, grand_total: invoice.sub_total ? invoice.sub_total - data.discount : 0 });
+  await invoice.updateOne({ ...data, grandTotal: invoice.subTotal ? invoice.subTotal - data.discount : 0 });
   await invoice.save();
 };
