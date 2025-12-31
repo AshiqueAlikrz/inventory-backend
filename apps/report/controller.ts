@@ -2,51 +2,23 @@ import { Request, response, Response } from "express";
 import Invoice from "./models/invoiceSchema";
 import Service from "./models/serviceSchema";
 import Customer from "./models/customerSchema";
-import { dailyReportsDB, editInvoiceDB, editInvoiceDetailsDB, getTodayReportsDB, montlyReportDB } from "./services/service";
+import { createInvoiceDB, dailyReportsDB, editInvoiceDB, editInvoiceDetailsDB, getTodayReportsDB, montlyReportDB } from "./services/service";
 
 export const createInvoice = async (req: Request, res: Response) => {
   try {
     const invoiceData = req.body;
-    console.log("invoiceData", invoiceData);
 
-    // Generate the next invoice number
-    const lastInvoice = await Invoice.findOne().sort({ invoice_number: -1 });
-    const invoiceNumber = (lastInvoice?.invoice_number ?? 0) + 1;
+    const { invoice, customerCheck } = await createInvoiceDB(invoiceData);
 
-    // Create and save the invoice first
-    const newInvoiceData = {
-      ...invoiceData,
-      invoice_number: invoiceNumber,
-    };
-
-    const newInvoice = new Invoice(newInvoiceData);
-    const savedInvoice = await newInvoice.save();
-
-    // Find or create customer
-    let customer = await Customer.findOne({ name: invoiceData.name });
-    let isNewCustomer = false;
-
-    if (!customer) {
-      // New customer with this invoice
-      customer = new Customer({
-        name: invoiceData.name,
-        products: [savedInvoice._id],
-      });
-      await customer.save();
-      isNewCustomer = true;
-    } else {
-      // Existing customer: add invoice reference
-      customer.products.push(savedInvoice._id);
-      await customer.save();
-    }
-
-    // Response
     res.status(201).json({
-      message: isNewCustomer ? "Invoice created and new customer added successfully" : "Invoice created successfully",
-      data: savedInvoice,
+      message: customerCheck ? "Invoice created and new customer added successfully" : "Invoice created successfully",
+      data: invoice,
     });
   } catch (error) {
-    res.status(500).json({ message: "Error creating invoice", error });
+    res.status(500).json({
+      message: "Error creating invoice",
+      error,
+    });
   }
 };
 

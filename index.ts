@@ -12,7 +12,6 @@ const app: Express = express();
 
 const mongoUri = process.env.MONGODB_CONNECTION;
 
-console.log(mongoUri);
 
 if (!mongoUri) {
   throw new Error("MongoDB connection URI is missing from the environment variables");

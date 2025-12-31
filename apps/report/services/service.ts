@@ -4,6 +4,45 @@ import DailyReport from "../models/dailyReportSchema";
 import Invoice from "../models/invoiceSchema";
 import MonthlyReport from "../models/montlyReportSchema";
 
+export const createInvoiceDB = async (invoiceData: any) => {
+  const lastInvoice = await Invoice.findOne().sort({ invoice_number: -1 });
+  const invoiceNumber = (lastInvoice?.invoice_number ?? 0) + 1;
+
+  let vatRedaucedRate = invoiceData.items;
+
+  if (invoiceData.vatPaidByCompany) {
+    vatRedaucedRate = invoiceData.items.map((item: any) => ({
+      ...item,
+      serviceCharge: item.serviceCharge - item.tax,
+    }));
+  }
+  const savedInvoice = await new Invoice({
+    ...invoiceData,
+    items: vatRedaucedRate,
+    invoice_number: invoiceNumber,
+  }).save();
+
+  let customer = await Customer.findOne({ name: invoiceData.name });
+  let customerCheck = false;
+
+  if (!customer) {
+    customer = new Customer({
+      name: invoiceData.name,
+      products: [savedInvoice._id],
+    });
+    await customer.save();
+    customerCheck = true;
+  } else {
+    customer.products.push(savedInvoice._id);
+    await customer.save();
+  }
+
+  return {
+    invoice: savedInvoice,
+    customerCheck,
+  };
+};
+
 export const dailyReportsDB = async () => {
   try {
     const aggregatedData = await Invoice.aggregate([
