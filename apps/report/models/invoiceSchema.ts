@@ -20,6 +20,7 @@ const itemSchema = new Schema({
   serviceCharge: {
     type: Number,
   },
+
   total: {
     type: Number,
   },
@@ -40,8 +41,13 @@ const invoiceSchema = new Schema({
   },
   date: {
     type: Date,
+    required: true,
   },
   invoice_number: {
+    type: Number,
+    required: true,
+  },
+  trn: {
     type: Number,
   },
   items: {
@@ -64,15 +70,20 @@ const invoiceSchema = new Schema({
   },
   discount: {
     type: Number,
-    default: 0, // Default discount is 0 if not provided
+    default: 0,
   },
   paid: {
     type: Boolean,
-    default: false, // Default is unpaid
+    default: false,
+  },
+  contact: {
+    type: Number,
+  },
+  address: {
+    type: String,
   },
 });
 
-// Create and export the Invoice model
 const Invoice = mongoose.model("Invoice", invoiceSchema);
 
 export default Invoice;

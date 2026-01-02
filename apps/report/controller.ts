@@ -52,7 +52,6 @@ export const getService = async (req: Request, res: Response) => {
 export const getInvoiceById = async (req: Request, res: Response) => {
   try {
     const invoiceId = req.params.invoiceId;
-    console.log("invoiceId", invoiceId);
     const invoice = await Invoice.findById(invoiceId).populate("items.description");
     res.status(200).json({ message: "invoice items fetched successfully", data: invoice });
   } catch (err) {
@@ -225,7 +224,6 @@ export const editInvoiceDetails = async (req: Request, res: Response) => {
     const data = req.body;
     const invoiceId = req.params.invoiceId;
     // const itemId = req.params.itemId;
-    console.log(data, invoiceId);
     const response = await editInvoiceDetailsDB(invoiceId, data);
     res.status(200).json({
       message: "Invoice updated successfully",
