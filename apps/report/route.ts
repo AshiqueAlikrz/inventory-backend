@@ -18,31 +18,36 @@ import {
   editInvoiceDetails,
   updateService,
   deleteService,
+  getAllCompanies,
 } from "./controller";
+import { authenticateToken } from "../utils/authMiddleware";
+// import { authMiddleware } from "../utils/authMiddleware";
 
-const router = Router();
+const reportRouter = Router();
+reportRouter.use(authenticateToken);
 
-router.post("/createInvoice", createInvoice);
-router.post("/createService", createService);
-router.get("/getInvoice", getInvoice);
-router.get("/getService", getService);
-router.get("/items/:invoiceId", getInvoiceItems);
-router.get("/invoice/:invoiceId", getInvoiceById);
-router.get("/getCustomer", getCustomerByName);
-router.get("/filterReport", getFilterReport);
-router.delete("/invoice/:invoiceId", deleteInvoiceById);
-router.put("/invoice/:invoiceId", updateInvoiceById);
-router.get("/lastReport", getLastInvoice);
-router.get("/dailyreports", getDailyReports);
-router.get("/monthlyreports", getMonthlyReports);
-router.get("/dashboardreports", getTodayReports);
-router.put("/editinvoice/:invoiceId/item/:itemId", editInvoiceItems);
-router.patch("/editinvoice/:invoiceId", editInvoiceDetails);
-router.patch("/editservice/:serviceId", updateService);
-router.delete("/deleteservice/:serviceId", deleteService);
-// router.get("/:id", getInvoiceById);
-// router.get("/:id", getInvoiceById);
+reportRouter.post("/createInvoice", createInvoice);
+reportRouter.post("/createService", createService);
+reportRouter.get("/getInvoice", getInvoice);
+reportRouter.get("/getService", getService);
+reportRouter.get("/items/:invoiceId", getInvoiceItems);
+reportRouter.get("/invoice/:invoiceId", getInvoiceById);
+reportRouter.get("/getCustomer", getCustomerByName);
+reportRouter.get("/filterReport", getFilterReport);
+reportRouter.delete("/invoice/:invoiceId", deleteInvoiceById);
+reportRouter.put("/invoice/:invoiceId", updateInvoiceById);
+reportRouter.get("/lastReport", getLastInvoice);
+reportRouter.get("/dailyreports", getDailyReports);
+reportRouter.get("/monthlyreports", getMonthlyReports);
+reportRouter.get("/dashboardreports", getTodayReports);
+reportRouter.put("/editinvoice/:invoiceId/item/:itemId", editInvoiceItems);
+reportRouter.patch("/editinvoice/:invoiceId", editInvoiceDetails);
+reportRouter.patch("/editservice/:serviceId", updateService);
+reportRouter.delete("/deleteservice/:serviceId", deleteService);
+reportRouter.get("/allcompany", getAllCompanies);
+// reportRouter.get("/:id", getInvoiceById);
+// reportRouter.get("/:id", getInvoiceById);
 // router.put("/:id", updateInvoice);
 // router.delete("/:id", deleteInvoice);
 
-export { router };
+export default reportRouter;

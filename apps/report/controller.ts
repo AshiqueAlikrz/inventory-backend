@@ -3,13 +3,12 @@ import Invoice from "./models/invoiceSchema";
 import Service from "./models/serviceSchema";
 import Customer from "./models/customerSchema";
 import { createInvoiceDB, dailyReportsDB, editInvoiceDB, editInvoiceDetailsDB, getTodayReportsDB, montlyReportDB } from "./services/service";
+import Company from "./models/companySchema";
 
 export const createInvoice = async (req: Request, res: Response) => {
   try {
     const invoiceData = req.body;
-
     const { invoice, customerCheck } = await createInvoiceDB(invoiceData);
-
     res.status(201).json({
       message: customerCheck ? "Invoice created and new customer added successfully" : "Invoice created successfully",
       data: invoice,
@@ -56,7 +55,7 @@ export const getInvoiceById = async (req: Request, res: Response) => {
     res.status(200).json({ message: "invoice items fetched successfully", data: invoice });
   } catch (err) {
     throw err;
-  }
+  } 
 };
 
 export const getInvoiceItems = async (req: Request, res: Response) => {
@@ -257,6 +256,18 @@ export const deleteService = async (req: Request, res: Response) => {
     } else {
       res.status(404).json({ message: "Service Not found" });
     }
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const getAllCompanies = async (req: Request, res: Response) => {
+  try {
+
+    console.log("Fetching all companies");
+    const companies = await Company.find();
+    console.log("Companies:", companies);
+    res.status(200).json({ data: companies, message: "Companies fetched successfully" });
   } catch (err) {
     res.status(500).json({ message: "Internal server error", error: err });
   }
