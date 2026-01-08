@@ -55,7 +55,7 @@ export const getInvoiceById = async (req: Request, res: Response) => {
     res.status(200).json({ message: "invoice items fetched successfully", data: invoice });
   } catch (err) {
     throw err;
-  } 
+  }
 };
 
 export const getInvoiceItems = async (req: Request, res: Response) => {
@@ -261,14 +261,3 @@ export const deleteService = async (req: Request, res: Response) => {
   }
 };
 
-export const getAllCompanies = async (req: Request, res: Response) => {
-  try {
-
-    console.log("Fetching all companies");
-    const companies = await Company.find();
-    console.log("Companies:", companies);
-    res.status(200).json({ data: companies, message: "Companies fetched successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Internal server error", error: err });
-  }
-};

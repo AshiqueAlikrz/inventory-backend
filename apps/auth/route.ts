@@ -1,7 +1,6 @@
 import { Router } from "express";
 
-import { signIn, signUp } from "./controller";
-import { getAllCompanies } from "../report/controller";
+import { getAllCompanies, signIn, signUp } from "./controller";
 
 const authRouter = Router();
 

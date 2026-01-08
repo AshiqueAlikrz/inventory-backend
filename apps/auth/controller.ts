@@ -3,6 +3,7 @@ import User from "./models/userSchema";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import Company from "../report/models/companySchema";
 
 dotenv.config();
 
@@ -82,5 +83,14 @@ export const signIn = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("SignIn Error:", error);
     return res.status(500).json({ message: "Internal server error", status: false });
+  }
+};
+
+export const getAllCompanies = async (req: Request, res: Response) => {
+  try {
+    const companies = await Company.find();
+    res.status(200).json({ data: companies, message: "Companies fetched successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
   }
 };
