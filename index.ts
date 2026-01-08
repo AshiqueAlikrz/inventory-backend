@@ -7,7 +7,6 @@ import reportRouter from "./apps/report/route";
 import { MongoClient, ServerApiVersion } from "mongodb";
 import authRouter from "./apps/auth/route";
 
-
 dotenv.config();
 const app: Express = express();
 
