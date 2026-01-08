@@ -31,7 +31,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     req.userId = decoded.userId;
 
     // ✅ Switch DB safely
-    req.database = mongoose.connection.useDb(decoded.database, {
+    req.database = mongoose.connection.useDb("alwahda2025", {
       useCache: true,
     });
 
