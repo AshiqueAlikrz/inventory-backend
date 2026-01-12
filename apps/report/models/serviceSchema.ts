@@ -1,6 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const ServiceSchema = new Schema({
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
+    required: true,
+  },
   name: {
     type: String,
     required: true,
@@ -13,4 +18,4 @@ const ServiceSchema = new Schema({
 
 const Service = mongoose.model("Service", ServiceSchema);
 
-export default Service; 
+export default Service;

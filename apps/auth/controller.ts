@@ -62,6 +62,7 @@ export const signIn = async (req: Request, res: Response) => {
         userId: user._id,
         email: user.email,
         database: user.database,
+        companyId: user.companyId._id,
       },
       JWT_SECRET,
       { expiresIn: "7d" }

@@ -29,7 +29,6 @@ const itemSchema = new Schema({
   },
 });
 
-// Define the invoice schema
 const invoiceSchema = new Schema({
   name: {
     type: String,
@@ -41,7 +40,7 @@ const invoiceSchema = new Schema({
   },
   date: {
     type: Date,
-    required: true,
+    // required: true,
   },
   invoice_number: {
     type: Number,
@@ -73,6 +72,10 @@ const invoiceSchema = new Schema({
     default: 0,
   },
   paid: {
+    type: Boolean,
+    default: false,
+  },
+  paymentMethod: {
     type: Boolean,
     default: false,
   },

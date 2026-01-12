@@ -4,6 +4,7 @@ const companyEmployee = new Schema({
   companyId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Company",
+    required: true,
   },
   name: {
     type: String,

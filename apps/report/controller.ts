@@ -4,6 +4,7 @@ import Service from "./models/serviceSchema";
 import Customer from "./models/customerSchema";
 import { createInvoiceDB, dailyReportsDB, editInvoiceDB, editInvoiceDetailsDB, getTodayReportsDB, montlyReportDB } from "./services/service";
 import Company from "./models/companySchema";
+import { AuthRequest } from "../utils/authMiddleware";
 
 export const createInvoice = async (req: Request, res: Response) => {
   try {
@@ -21,9 +22,9 @@ export const createInvoice = async (req: Request, res: Response) => {
   }
 };
 
-export const createService = async (req: Request, res: Response) => {
+export const createService = async (req: AuthRequest, res: Response) => {
   try {
-    const newService = new Service(req.body);
+    const newService = new Service({ ...req.body, companyId: req.companyId });
     const savedService = await newService.save();
     res.status(201).json({ message: "Service created  successfully", data: savedService });
   } catch (err) {
@@ -31,17 +32,17 @@ export const createService = async (req: Request, res: Response) => {
   }
 };
 
-export const getInvoice = async (req: Request, res: Response) => {
+export const getInvoice = async (req: AuthRequest, res: Response) => {
   try {
-    const invoices = await Invoice.find().sort({ invoice_number: -1 });
+    const invoices = await Invoice.find({ companyId: req?.companyId }).sort({ invoice_number: -1 });
     res.status(200).json({ message: "Invoices fetched successfully", data: invoices });
   } catch (err) {
     throw err;
   }
 };
-export const getService = async (req: Request, res: Response) => {
+export const getService = async (req: AuthRequest, res: Response) => {
   try {
-    const Services = await Service.find();
+    const Services = await Service.find({ companyId: req?.companyId });
     res.status(200).json({ message: "sevices fetched successfully", data: Services });
   } catch (err) {
     throw err;
@@ -160,11 +161,11 @@ export const getLastInvoice = async (req: Request, res: Response) => {
   }
 };
 
-export const getDailyReports = async (req: Request, res: Response) => {
+export const getDailyReports = async (req: AuthRequest, res: Response) => {
   try {
     const filter = req.body;
 
-    const response = await dailyReportsDB();
+    const response = await dailyReportsDB({ companyId: req?.companyId || "" });
 
     res.status(200).json({
       message: " Daily Report fetched successfully",
@@ -175,11 +176,11 @@ export const getDailyReports = async (req: Request, res: Response) => {
   }
 };
 
-export const getMonthlyReports = async (req: Request, res: Response) => {
+export const getMonthlyReports = async (req: AuthRequest, res: Response) => {
   try {
     const filter = req.body;
 
-    const response = await montlyReportDB(filter);
+    const response = await montlyReportDB({ companyId: req?.companyId || "" });
 
     res.status(200).json({
       message: " Monthly Report fetched successfully",
@@ -190,9 +191,9 @@ export const getMonthlyReports = async (req: Request, res: Response) => {
   }
 };
 
-export const getTodayReports = async (req: Request, res: Response) => {
+export const getTodayReports = async (req: AuthRequest, res: Response) => {
   try {
-    const response = await getTodayReportsDB();
+    const response = await getTodayReportsDB({ companyId: req?.companyId || "" });
     res.status(200).json({
       message: "Dashboard report fetched successfully",
       data: response,
@@ -260,4 +261,3 @@ export const deleteService = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Internal server error", error: err });
   }
 };
-

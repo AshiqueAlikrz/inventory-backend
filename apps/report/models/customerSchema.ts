@@ -1,6 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const customerSchema = new Schema({
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
+    // required: true,
+  },
   name: {
     type: String,
     required: true,

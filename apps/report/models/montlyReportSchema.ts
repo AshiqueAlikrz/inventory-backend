@@ -1,6 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 
 const monthlyReportSchema = new Schema({
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
+    required: true,
+  },
   year: { type: Number, required: true }, // Date of entry
   month: { type: Number, required: true }, // Date of entry
   expense: { type: Number, required: true },
