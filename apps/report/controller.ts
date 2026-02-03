@@ -5,6 +5,7 @@ import Customer from "./models/customerSchema";
 import { createInvoiceDB, dailyReportsDB, editInvoiceDB, editInvoiceDetailsDB, getTodayReportsDB, montlyReportDB } from "./services/service";
 import Company from "./models/companySchema";
 import { AuthRequest } from "../utils/authMiddleware";
+import QuotationReport from "./models/quotationSchema";
 
 export const createInvoice = async (req: Request, res: Response) => {
   try {
@@ -257,6 +258,32 @@ export const deleteService = async (req: Request, res: Response) => {
     } else {
       res.status(404).json({ message: "Service Not found" });
     }
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const createQuotation = async (req: Request, res: Response) => {
+  try {
+    const serviceId = req.params.serviceId;
+    const quotationData = req.body;
+
+    if (!serviceId) {
+      return res.status(400).json({ message: "Service ID is required" });
+    }
+
+    // Create a new quotation
+    const newQuotation = new QuotationReport({
+      serviceId,
+      ...quotationData, // spread all the fields from the request body
+    });
+
+    await newQuotation.save();
+
+    res.status(201).json({
+      message: "Quotation created successfully",
+      quotation: newQuotation,
+    });
   } catch (err) {
     res.status(500).json({ message: "Internal server error", error: err });
   }

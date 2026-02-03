@@ -65,7 +65,7 @@ export const signIn = async (req: Request, res: Response) => {
         companyId: user.companyId._id,
       },
       JWT_SECRET,
-      { expiresIn: "7d" }
+      { expiresIn: "7d" },
     );
 
     // 4️⃣ Success response

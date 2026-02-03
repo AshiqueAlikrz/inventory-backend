@@ -18,6 +18,7 @@ import {
   editInvoiceDetails,
   updateService,
   deleteService,
+  createQuotation,
 } from "./controller";
 import { authenticateToken } from "../utils/authMiddleware";
 // import { authMiddleware } from "../utils/authMiddleware";
@@ -43,6 +44,8 @@ reportRouter.put("/editinvoice/:invoiceId/item/:itemId", editInvoiceItems);
 reportRouter.patch("/editinvoice/:invoiceId", editInvoiceDetails);
 reportRouter.patch("/editservice/:serviceId", updateService);
 reportRouter.delete("/deleteservice/:serviceId", deleteService);
+reportRouter.post("/createquotation", createQuotation);
+// reportRouter.delete("/deleteservice/:serviceId", getQuotitions);
 // reportRouter.get("/:id", getInvoiceById);
 // reportRouter.get("/:id", getInvoiceById);
 // router.put("/:id", updateInvoice);

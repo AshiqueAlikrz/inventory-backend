@@ -81,7 +81,10 @@ export const dailyReportsDB = async ({ companyId }: { companyId: string }) => {
 
     const savePromises = aggregatedData.map((record) =>
       DailyReport.findOneAndUpdate(
-        { companyId },
+        {
+          companyId,
+          date: record.date,
+        },
         {
           companyId,
           date: record.date,
@@ -90,8 +93,8 @@ export const dailyReportsDB = async ({ companyId }: { companyId: string }) => {
           vat: record.vat,
           discount: record.discount,
         },
-        { upsert: true, new: true }
-      )
+        { upsert: true, new: true },
+      ),
     );
 
     const reports = await Promise.all(savePromises);
@@ -104,26 +107,27 @@ export const dailyReportsDB = async ({ companyId }: { companyId: string }) => {
 
 export const montlyReportDB = async ({ companyId }: { companyId: string }) => {
   try {
+    const companyObjectId = new mongoose.Types.ObjectId(companyId);
+
     const monthlyReportAggregation = await DailyReport.aggregate([
-      { $match: { companyId: new mongoose.Types.ObjectId(companyId) } },
+      { $match: { companyId: companyObjectId } },
       {
         $project: {
           year: { $year: "$date" },
           month: { $month: "$date" },
-          discount: "$discount",
-          profit: "$profit",
-          vat: "$vat",
-          expense: "$expense",
+          profit: 1,
+          expense: 1,
+          vat: 1,
+          discount: 1,
         },
       },
       {
         $group: {
           _id: { year: "$year", month: "$month" },
-          totalProfit: { $sum: "$profit" },
-          totalDiscount: { $sum: "$discount" },
-          totalExpense: { $sum: "$expense" },
-          totalVat: { $sum: "$vat" },
-          expense: { $sum: "$vat" },
+          profit: { $sum: "$profit" },
+          expense: { $sum: "$expense" },
+          vat: { $sum: "$vat" },
+          discount: { $sum: "$discount" },
         },
       },
       {
@@ -131,34 +135,31 @@ export const montlyReportDB = async ({ companyId }: { companyId: string }) => {
           _id: 0,
           year: "$_id.year",
           month: "$_id.month",
-          profit: "$totalProfit",
-          expense: "$totalExpense",
-          discount: "$totalDiscount",
-          vat: "$totalVat",
+          profit: 1,
+          expense: 1,
+          vat: 1,
+          discount: 1,
         },
       },
-      { $sort: { year: 1, month: 1 } },
     ]);
 
-    const savePromises = monthlyReportAggregation.map((record) =>
-      MonthlyReport.findOneAndUpdate(
-        { companyId },
-        {
-          companyId,
-          expense: record.expense,
-          year: record.year,
-          month: record.month,
-          profit: record.profit,
-          vat: record.vat,
-          discount: record.discount,
-        },
-        { upsert: true, new: true }
-      )
+    const reports = await Promise.all(
+      monthlyReportAggregation.map((record) =>
+        MonthlyReport.findOneAndUpdate(
+          {
+            companyId: companyObjectId,
+            year: record.year,
+            month: record.month,
+          },
+          { $set: record },
+          { upsert: true, new: true },
+        ),
+      ),
     );
-    const reports = await Promise.all(savePromises);
+
     return reports;
   } catch (error) {
-    console.error("Error generating daily reports:", error);
+    console.error("Error generating monthly reports:", error);
     throw error;
   }
 };

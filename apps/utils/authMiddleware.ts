@@ -33,10 +33,10 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
 
     // Attach userId and companyId to request
     req.userId = decoded.userId;
-    req.companyId = decoded.companyId;
+    req.companyId = decoded.companyId; 
 
     next();
-  } catch (error) {
+  } catch (error) { 
     console.error("JWT Error:", error);
     return res.status(403).json({ message: "Invalid or expired token" });
   }
