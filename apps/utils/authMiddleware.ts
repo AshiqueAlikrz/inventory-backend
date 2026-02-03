@@ -14,7 +14,7 @@ interface JwtPayload {
   role?: string; // optional if you store role in JWT
 }
 
-/**
+/** 
  * Middleware to authenticate a JWT token from the request headers.
  *
  * Adds `userId` and `companyId` to `req` if token is valid.
