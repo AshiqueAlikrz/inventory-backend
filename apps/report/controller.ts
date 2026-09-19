@@ -7,9 +7,10 @@ import Company from "./models/companySchema";
 import { AuthRequest } from "../utils/authMiddleware";
 import QuotationReport from "./models/quotationSchema";
 
-export const createInvoice = async (req: Request, res: Response) => {
+export const createInvoice = async (req: AuthRequest, res: Response) => {
   try {
-    const invoiceData = req.body;
+    // createdBy always comes from the logged-in user's token, never from the request body
+    const invoiceData = { ...req.body, createdBy: req.userId };
     const { invoice, customerCheck } = await createInvoiceDB(invoiceData);
     res.status(201).json({
       message: customerCheck ? "Invoice created and new customer added successfully" : "Invoice created successfully",
@@ -53,7 +54,7 @@ export const getService = async (req: AuthRequest, res: Response) => {
 export const getInvoiceById = async (req: Request, res: Response) => {
   try {
     const invoiceId = req.params.invoiceId;
-    const invoice = await Invoice.findById(invoiceId).populate("items.description");
+    const invoice = await Invoice.findById(invoiceId).populate("items.description").populate("createdBy", "name");
     res.status(200).json({ message: "invoice items fetched successfully", data: invoice });
   } catch (err) {
     throw err;

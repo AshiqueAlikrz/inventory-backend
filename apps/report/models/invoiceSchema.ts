@@ -38,6 +38,10 @@ const invoiceSchema = new Schema({
     ref: "Company",
     // required: true,
   },
+  createdBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "user",
+  },
   date: {
     type: Date,
     // required: true,
