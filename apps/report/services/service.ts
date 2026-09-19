@@ -47,7 +47,7 @@ export const createInvoiceDB = async (invoiceData: any) => {
 export const dailyReportsDB = async ({ companyId }: { companyId: string }) => {
   try {
     const aggregatedData = await Invoice.aggregate([
-      { $match: { companyId: new mongoose.Types.ObjectId(companyId) } },
+      { $match: { companyId: new mongoose.Types.ObjectId(companyId), date: { $ne: null } } },
       {
         $project: {
           date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
@@ -98,6 +98,13 @@ export const dailyReportsDB = async ({ companyId }: { companyId: string }) => {
     );
 
     const reports = await Promise.all(savePromises);
+
+    // Drop rows for days that no longer have invoices (invoice deleted or moved to another date)
+    await DailyReport.deleteMany({
+      companyId,
+      date: { $nin: aggregatedData.map((record) => new Date(record.date)) },
+    });
+
     return reports;
   } catch (error) {
     console.error("Error generating daily reports:", error);
@@ -109,15 +116,16 @@ export const montlyReportDB = async ({ companyId }: { companyId: string }) => {
   try {
     const companyObjectId = new mongoose.Types.ObjectId(companyId);
 
-    const monthlyReportAggregation = await DailyReport.aggregate([
-      { $match: { companyId: companyObjectId } },
+    // Built straight from invoices so it never depends on the daily report having been generated first
+    const monthlyReportAggregation = await Invoice.aggregate([
+      { $match: { companyId: companyObjectId, date: { $ne: null } } },
       {
         $project: {
           year: { $year: "$date" },
           month: { $month: "$date" },
           profit: 1,
-          expense: 1,
-          vat: 1,
+          expense: "$grandTotal",
+          vat: "$totalVat",
           discount: 1,
         },
       },
@@ -141,6 +149,7 @@ export const montlyReportDB = async ({ companyId }: { companyId: string }) => {
           discount: 1,
         },
       },
+      { $sort: { year: -1, month: -1 } },
     ]);
 
     const reports = await Promise.all(
@@ -156,6 +165,14 @@ export const montlyReportDB = async ({ companyId }: { companyId: string }) => {
         ),
       ),
     );
+
+    // Drop rows for months that no longer have invoices
+    await MonthlyReport.deleteMany({
+      companyId: companyObjectId,
+      ...(monthlyReportAggregation.length
+        ? { $nor: monthlyReportAggregation.map((record) => ({ year: record.year, month: record.month })) }
+        : {}),
+    });
 
     return reports;
   } catch (error) {
@@ -199,21 +216,43 @@ export const editInvoiceDB = async (invoiceId: string, itemId: string, data: any
   if (!invoice) throw new Error("No invoice found");
   const item = invoice.items.find((item) => item._id.equals(itemId));
   if (!item) throw new Error("Item not found in invoice");
-  item.serviceCharge = data.serviceCharge;
-  item.tax = data.tax ? data.tax : 0;
-  item.rate = data.rate;
-  item.quantity = data.quantity;
-  item.total = data.quantity * data.rate;
-  invoice.subTotal = invoice.items.reduce((acc: number, curr: any) => {
-    return acc + (curr.total ? curr.total : 0);
-  }, 0);
-  invoice.grandTotal = invoice.subTotal ? invoice.subTotal - invoice.discount : 0;
+  const serviceCharge = Number(data.serviceCharge);
+  const tax = data.tax ? Number(data.tax) : 0;
+  const rate = Number(data.rate);
+  const quantity = Number(data.quantity);
+  if (![serviceCharge, tax, rate, quantity].every(Number.isFinite)) throw new Error("Invalid item values");
+
+  item.serviceCharge = serviceCharge;
+  item.tax = tax;
+  item.rate = rate;
+  item.quantity = quantity;
+  item.total = roundMoney(quantity * rate + serviceCharge + tax);
+  Object.assign(invoice, invoiceTotals(invoice.items, invoice.discount ?? 0));
   await invoice.save();
 };
 
 export const editInvoiceDetailsDB = async (invoiceId: string, data: any) => {
   const invoice = await Invoice.findById(invoiceId);
   if (!invoice) throw new Error("Invoice not found ");
-  await invoice.updateOne({ ...data, grandTotal: invoice.subTotal ? invoice.subTotal - data.discount : 0 });
-  await invoice.save();
+  const discount = data.discount === undefined ? invoice.discount ?? 0 : Number(data.discount);
+  if (!Number.isFinite(discount)) throw new Error("Invalid discount");
+  await invoice.updateOne({ ...data, ...invoiceTotals(invoice.items, discount), discount });
+};
+
+const roundMoney = (value: number) => Math.round(value * 100) / 100;
+
+/**
+ * Invoice-level figures, always derived from the items and the discount so edits can't leave them out of sync.
+ * A stored item's serviceCharge is already net of VAT when the company pays it, so in both VAT modes:
+ *   item total = rate * quantity + serviceCharge + tax, and profit = sum of serviceCharge - discount.
+ */
+const invoiceTotals = (items: any[], discount: number) => {
+  const sum = (pick: (item: any) => number | undefined) => items.reduce((acc, item) => acc + (pick(item) ?? 0), 0);
+  const subTotal = sum((item) => item.total);
+  return {
+    subTotal,
+    totalVat: sum((item) => item.tax),
+    grandTotal: subTotal - discount,
+    profit: sum((item) => item.serviceCharge) - discount,
+  };
 };
