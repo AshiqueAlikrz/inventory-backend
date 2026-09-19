@@ -165,29 +165,25 @@ export const montlyReportDB = async ({ companyId }: { companyId: string }) => {
 };
 
 export const getTodayReportsDB = async ({ companyId }: { companyId: string }) => {
-  const totalUsers = await Invoice.find({ companyId }).countDocuments();
-  const todayReport = await MonthlyReport.aggregate([
-    { $match: { companyId: new mongoose.Types.ObjectId(companyId) } },
-    {
-      $project: {
-        _id: "_id",
-        expense: "$expense",
-        profit: "$profit",
-        vat: "$vat",
-        discount: "$discount",
-      },
-    },
+  const companyObjectId = new mongoose.Types.ObjectId(companyId);
+  const totalUsers = await Invoice.countDocuments({ companyId: companyObjectId });
+
+  // Sum straight from invoices so the dashboard is correct as soon as an invoice is created,
+  // without depending on the daily/monthly report collections having been generated first.
+  const todayReport = await Invoice.aggregate([
+    { $match: { companyId: companyObjectId } },
     {
       $group: {
-        _id: "_id",
+        _id: null,
         totalProfit: { $sum: "$profit" },
-        totalExpense: { $sum: "$expense" },
-        totalVat: { $sum: "$vat" },
+        totalExpense: { $sum: "$grandTotal" },
+        totalVat: { $sum: "$totalVat" },
         totalDiscount: { $sum: "$discount" },
       },
     },
     {
       $project: {
+        _id: 0,
         profit: "$totalProfit",
         expense: "$totalExpense",
         vat: "$totalVat",
