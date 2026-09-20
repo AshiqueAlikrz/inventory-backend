@@ -102,11 +102,17 @@ export const createCompany = async (req: Request, res: Response) => {
       return res.status(409).json({ message: "Company already exists" });
     }
 
+    // phoneNumber is stored as a Number, so drop formatting like "+", spaces and dashes
+    const phoneDigits = String(phoneNumber ?? "").replace(/[\s\-()+.]/g, "");
+    if (phoneDigits && !/^\d+$/.test(phoneDigits)) {
+      return res.status(400).json({ message: "Phone number can only contain digits" });
+    }
+
     const now = new Date().toISOString();
     const company = await Company.create({
       companyName: name,
       businessType: businessType.trim(),
-      phoneNumber: phoneNumber ? Number(phoneNumber) : undefined,
+      phoneNumber: phoneDigits ? Number(phoneDigits) : undefined,
       purchaseDate,
       expiryDate,
       isActive: true,
@@ -115,8 +121,11 @@ export const createCompany = async (req: Request, res: Response) => {
     });
 
     return res.status(201).json({ message: "Company created successfully", data: company });
-  } catch (err) {
+  } catch (err: any) {
     console.error("Create Company Error:", err);
+    if (err?.name === "ValidationError") {
+      return res.status(400).json({ message: err.message });
+    }
     return res.status(500).json({ message: "Internal server error" });
   }
 };
