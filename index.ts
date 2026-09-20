@@ -6,6 +6,7 @@ import dotenv from "dotenv";
 import reportRouter from "./apps/report/route";
 import { MongoClient, ServerApiVersion } from "mongodb";
 import authRouter from "./apps/auth/route";
+import QuotationReport from "./apps/report/models/quotationSchema";
 
 dotenv.config();
 const app: Express = express();
@@ -20,6 +21,8 @@ const connectDB = async () => {
   try {
     await mongoose.connect(mongoUri);
     console.log("Connected to MongoDB successfully");
+    // quotation numbers are unique per company; this drops the older global unique index on quoteNo if it exists
+    await QuotationReport.syncIndexes().catch((err) => console.error("Quotation index sync failed:", err));
   } catch (err) {
     console.error("MongoDB connection error:", err);
     process.exit(1);
@@ -29,7 +32,8 @@ const connectDB = async () => {
 connectDB();
 
 app.use(cors());
-app.use(express.json());
+// larger limit so an invoice PDF can be posted as base64 to the send-email route
+app.use(express.json({ limit: "5mb" }));
 
 app.use("/api/reports", reportRouter);
 app.use("/api/auth", authRouter);

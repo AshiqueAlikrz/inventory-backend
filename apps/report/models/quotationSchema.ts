@@ -9,6 +9,15 @@ const ItemSchema = new Schema({
 
 const QuotationSchema = new Schema(
   {
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "user",
+    },
     company: {
       name: { type: String, required: true },
       address: { type: String },
@@ -16,7 +25,9 @@ const QuotationSchema = new Schema(
       email: { type: String },
     },
     client: { type: String, required: true },
-    quoteNo: { type: String, required: true, unique: true },
+    // quoteSeq is the running number within a company; quoteNo is its display form (QT-0001)
+    quoteSeq: { type: Number, required: true },
+    quoteNo: { type: String, required: true },
     date: { type: Date, required: true },
     items: [ItemSchema],
     subtotal: { type: Number, default: 0 },
@@ -32,6 +43,9 @@ const QuotationSchema = new Schema(
     timestamps: true,
   },
 );
+
+// numbers only need to be unique within one company
+QuotationSchema.index({ companyId: 1, quoteNo: 1 }, { unique: true });
 
 const QuotationReport = mongoose.model("Quotation", QuotationSchema);
 

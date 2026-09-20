@@ -5,18 +5,15 @@ import Invoice from "../models/invoiceSchema";
 import MonthlyReport from "../models/montlyReportSchema";
 import mongoose from "mongoose";
 
-export const createInvoiceDB = async (invoiceData: any) => {
+// When the company pays the VAT, it comes out of each line's service charge
+export const reduceVatFromItems = (items: any[], vatPaidByCompany: boolean) =>
+  vatPaidByCompany ? items.map((item: any) => ({ ...item, serviceCharge: item.serviceCharge - item.tax })) : items;
+
+export const createInvoiceDB = async (invoiceData: any, { reduceVat = true } = {}) => {
   const lastInvoice = await Invoice.findOne().sort({ invoice_number: -1 });
   const invoiceNumber = (lastInvoice?.invoice_number ?? 0) + 1;
 
-  let vatRedaucedRate = invoiceData.items;
-
-  if (invoiceData.vatPaidByCompany) {
-    vatRedaucedRate = invoiceData.items.map((item: any) => ({
-      ...item,
-      serviceCharge: item.serviceCharge - item.tax,
-    }));
-  }
+  const vatRedaucedRate = reduceVat ? reduceVatFromItems(invoiceData.items, invoiceData.vatPaidByCompany) : invoiceData.items;
   const savedInvoice = await new Invoice({
     ...invoiceData,
     items: vatRedaucedRate,
@@ -29,6 +26,10 @@ export const createInvoiceDB = async (invoiceData: any) => {
   if (!customer) {
     customer = new Customer({
       name: invoiceData.name,
+      companyId: invoiceData.companyId,
+      contact: invoiceData.contact || undefined,
+      trn: invoiceData.trn || undefined,
+      address: invoiceData.address || undefined,
       products: [savedInvoice._id],
     });
     await customer.save();

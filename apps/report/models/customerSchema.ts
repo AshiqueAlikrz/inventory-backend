@@ -10,6 +10,18 @@ const customerSchema = new Schema({
     type: String,
     required: true,
   },
+  contact: {
+    type: Number,
+  },
+  trn: {
+    type: Number,
+  },
+  address: {
+    type: String,
+  },
+  email: {
+    type: String,
+  },
   products: {
     type: [
       {

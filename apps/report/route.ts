@@ -19,6 +19,15 @@ import {
   updateService,
   deleteService,
   createQuotation,
+  getQuotations,
+  getQuotationById,
+  sendInvoiceEmail,
+  getCustomers,
+  createCustomer,
+  createProforma,
+  getProformas,
+  getProformaById,
+  convertProforma,
 } from "./controller";
 import { authenticateToken } from "../utils/authMiddleware";
 // import { authMiddleware } from "../utils/authMiddleware";
@@ -33,6 +42,12 @@ reportRouter.get("/getService", getService);
 reportRouter.get("/items/:invoiceId", getInvoiceItems);
 reportRouter.get("/invoice/:invoiceId", getInvoiceById);
 reportRouter.get("/getCustomer", getCustomerByName);
+reportRouter.get("/customers", getCustomers);
+reportRouter.get("/proformas", getProformas);
+reportRouter.post("/proformas", createProforma);
+reportRouter.get("/proformas/:proformaId", getProformaById);
+reportRouter.post("/proformas/:proformaId/convert", convertProforma);
+reportRouter.post("/customers", createCustomer);
 reportRouter.get("/filterReport", getFilterReport);
 reportRouter.delete("/invoice/:invoiceId", deleteInvoiceById);
 reportRouter.put("/invoice/:invoiceId", updateInvoiceById);
@@ -45,6 +60,9 @@ reportRouter.patch("/editinvoice/:invoiceId", editInvoiceDetails);
 reportRouter.patch("/editservice/:serviceId", updateService);
 reportRouter.delete("/deleteservice/:serviceId", deleteService);
 reportRouter.post("/createquotation", createQuotation);
+reportRouter.get("/quotations", getQuotations);
+reportRouter.get("/quotation/:quotationId", getQuotationById);
+reportRouter.post("/invoice/:invoiceId/send-email", sendInvoiceEmail);
 // reportRouter.delete("/deleteservice/:serviceId", getQuotitions);
 // reportRouter.get("/:id", getInvoiceById);
 // reportRouter.get("/:id", getInvoiceById);
