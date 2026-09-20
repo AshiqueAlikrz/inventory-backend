@@ -87,6 +87,40 @@ export const signIn = async (req: Request, res: Response) => {
   }
 };
 
+export const createCompany = async (req: Request, res: Response) => {
+  try {
+    const { companyName, businessType, phoneNumber, purchaseDate, expiryDate } = req.body;
+
+    if (!companyName?.trim() || !businessType?.trim()) {
+      return res.status(400).json({ message: "Company name and business type are required" });
+    }
+
+    const name = companyName.trim();
+    const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const exists = await Company.findOne({ companyName: { $regex: `^${escapedName}$`, $options: "i" } });
+    if (exists) {
+      return res.status(409).json({ message: "Company already exists" });
+    }
+
+    const now = new Date().toISOString();
+    const company = await Company.create({
+      companyName: name,
+      businessType: businessType.trim(),
+      phoneNumber: phoneNumber ? Number(phoneNumber) : undefined,
+      purchaseDate,
+      expiryDate,
+      isActive: true,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return res.status(201).json({ message: "Company created successfully", data: company });
+  } catch (err) {
+    console.error("Create Company Error:", err);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
+
 export const getAllCompanies = async (req: Request, res: Response) => {
   try {
     const companies = await Company.find();
