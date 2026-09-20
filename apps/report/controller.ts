@@ -127,15 +127,14 @@ export const getFilterReport = async (req: Request, res: Response) => {
   }
 };
 
-export const deleteInvoiceById = async (req: Request, res: Response) => {
+export const deleteInvoiceById = async (req: AuthRequest, res: Response) => {
   try {
-    const invoiceId = req.params.invoiceId;
-    if (invoiceId) {
-      await Invoice.findByIdAndDelete(invoiceId);
-      res.status(200).json({ message: "Invoice deleted successfully" });
-    } else {
-      res.status(404).json({ message: "Invoice Not found" });
+    // scoped to the caller's company so one company can't delete another's invoice
+    const deleted = await Invoice.findOneAndDelete({ _id: req.params.invoiceId, companyId: req.companyId });
+    if (!deleted) {
+      return res.status(404).json({ message: "Invoice Not found" });
     }
+    res.status(200).json({ message: "Invoice deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: "Internal server error", error: err });
   }
