@@ -8,7 +8,7 @@ import Company from "./models/companySchema";
 import { AuthRequest } from "../utils/authMiddleware";
 import QuotationReport from "./models/quotationSchema";
 import { createQuotationDB, QuotationValidationError } from "./services/quotation";
-import { MailNotConfiguredError, sendMail } from "../utils/mailer";
+import { describeMailError, MailNotConfiguredError, sendMail } from "../utils/mailer";
 import Proforma from "./models/proformaSchema";
 import { convertProformaDB, createProformaDB, ProformaStateError, ProformaValidationError } from "./services/proforma";
 
@@ -393,6 +393,10 @@ export const sendInvoiceEmail = async (req: AuthRequest, res: Response) => {
     console.error("Send invoice email error:", err);
     if (err instanceof MailNotConfiguredError) {
       return res.status(503).json({ message: err.message });
+    }
+    const known = describeMailError(err);
+    if (known) {
+      return res.status(known.status).json({ message: known.message });
     }
     res.status(500).json({ message: "Failed to send invoice email" });
   }
