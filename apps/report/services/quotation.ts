@@ -50,7 +50,11 @@ const cleanInput = (data: any) => {
     .filter(Boolean)
     .slice(0, MAX_TERMS);
 
-  return { client, date, items, terms };
+  // optional: a number typed by the user instead of the automatic one
+  const quoteNo = String(data?.quoteNo ?? "").trim();
+  if (quoteNo.length > 30) throw new QuotationValidationError("Quotation number can be at most 30 characters");
+
+  return { client, date, items, terms, quoteNo };
 };
 
 interface CreateQuotationArgs {
@@ -60,17 +64,18 @@ interface CreateQuotationArgs {
 }
 
 export const createQuotationDB = async ({ companyId, userId, data }: CreateQuotationArgs) => {
-  const { client, date, items, terms } = cleanInput(data);
+  const { client, date, items, terms, quoteNo: customQuoteNo } = cleanInput(data);
   const company = await Company.findById(companyId);
   if (!company) throw new QuotationValidationError("Company not found");
 
   const totals = quotationTotals(items);
 
-  // The number is the company's next in sequence. Two people saving at once can pick the same one;
-  // the unique (companyId, quoteNo) index rejects the second, which then simply takes the next number.
+  // The number is the company's next in sequence unless the user typed their own. Two people saving at once
+  // can pick the same one; the unique (companyId, quoteNo) index rejects the second, which then takes the next number.
+  // Each retry also steps past a number that someone typed by hand earlier.
   for (let attempt = 0; attempt < 5; attempt++) {
     const last = await QuotationReport.findOne({ companyId }).sort({ quoteSeq: -1 });
-    const quoteSeq = (last?.quoteSeq ?? 0) + 1;
+    const quoteSeq = (last?.quoteSeq ?? 0) + 1 + attempt;
     try {
       return await QuotationReport.create({
         companyId,
@@ -78,7 +83,7 @@ export const createQuotationDB = async ({ companyId, userId, data }: CreateQuota
         company: { name: company.companyName },
         client,
         quoteSeq,
-        quoteNo: `QT-${String(quoteSeq).padStart(4, "0")}`,
+        quoteNo: customQuoteNo || `QT-${String(quoteSeq).padStart(4, "0")}`,
         date,
         items: items.map((item: any, index: number) => ({ ...item, amount: totals.lines[index] })),
         subtotal: totals.subtotal,
@@ -89,6 +94,7 @@ export const createQuotationDB = async ({ companyId, userId, data }: CreateQuota
       });
     } catch (err: any) {
       if (err?.code !== 11000) throw err;
+      if (customQuoteNo) throw new QuotationValidationError(`Quotation number ${customQuoteNo} is already used`);
     }
   }
   throw new Error("Could not assign a quotation number, please try again");

@@ -27,6 +27,9 @@ const itemSchema = new Schema({
   vat: {
     type: Boolean,
   },
+  vatPaidByCompany: {
+    type: Boolean,
+  },
 });
 
 const invoiceSchema = new Schema({

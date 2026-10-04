@@ -307,6 +307,60 @@ export const getQuotationById = async (req: AuthRequest, res: Response) => {
   }
 };
 
+const DEFAULT_QUOTATION_TERMS = [
+  "Payment should be made within 7 days.",
+  "All prices are in AED and exclude 5% VAT.",
+  "Quotation valid for 15 days only.",
+  "Delivery timeline will be confirmed after approval.",
+];
+
+// a company that has never edited its list starts from the defaults
+const loadQuotationTerms = async (companyId: any): Promise<string[]> => {
+  const company = await Company.findById(companyId).select("quotationTerms");
+  return company?.quotationTerms ?? DEFAULT_QUOTATION_TERMS;
+};
+
+export const getQuotationTerms = async (req: AuthRequest, res: Response) => {
+  try {
+    res.status(200).json({ message: "Terms fetched successfully", data: await loadQuotationTerms(req.companyId) });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const addQuotationTerm = async (req: AuthRequest, res: Response) => {
+  try {
+    const term = typeof req.body?.term === "string" ? req.body.term.trim() : "";
+    if (!term) {
+      return res.status(400).json({ message: "Enter the term to add" });
+    }
+    if (term.length > 300) {
+      return res.status(400).json({ message: "A term can be at most 300 characters" });
+    }
+    const terms = await loadQuotationTerms(req.companyId);
+    if (terms.some((saved) => saved.toLowerCase() === term.toLowerCase())) {
+      return res.status(400).json({ message: "That term is already in the list" });
+    }
+    const updated = [...terms, term];
+    await Company.updateOne({ _id: req.companyId }, { $set: { quotationTerms: updated } });
+    res.status(201).json({ message: "Term added", data: updated });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const deleteQuotationTerm = async (req: AuthRequest, res: Response) => {
+  try {
+    const term = typeof req.body?.term === "string" ? req.body.term : "";
+    const terms = await loadQuotationTerms(req.companyId);
+    const updated = terms.filter((saved) => saved !== term);
+    await Company.updateOne({ _id: req.companyId }, { $set: { quotationTerms: updated } });
+    res.status(200).json({ message: "Term removed", data: updated });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const getCustomers = async (req: AuthRequest, res: Response) => {

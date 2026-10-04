@@ -9,6 +9,7 @@ const itemSchema = new Schema({
   serviceCharge: { type: Number },
   total: { type: Number },
   vat: { type: Boolean },
+  vatPaidByCompany: { type: Boolean },
 });
 
 const proformaSchema = new Schema(

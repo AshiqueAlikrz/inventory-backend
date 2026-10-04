@@ -21,6 +21,9 @@ import {
   createQuotation,
   getQuotations,
   getQuotationById,
+  getQuotationTerms,
+  addQuotationTerm,
+  deleteQuotationTerm,
   sendInvoiceEmail,
   getCustomers,
   createCustomer,
@@ -62,6 +65,9 @@ reportRouter.delete("/deleteservice/:serviceId", deleteService);
 reportRouter.post("/createquotation", createQuotation);
 reportRouter.get("/quotations", getQuotations);
 reportRouter.get("/quotation/:quotationId", getQuotationById);
+reportRouter.get("/quotationterms", getQuotationTerms);
+reportRouter.post("/quotationterms", addQuotationTerm);
+reportRouter.delete("/quotationterms", deleteQuotationTerm);
 reportRouter.post("/invoice/:invoiceId/send-email", sendInvoiceEmail);
 // reportRouter.delete("/deleteservice/:serviceId", getQuotitions);
 // reportRouter.get("/:id", getInvoiceById);

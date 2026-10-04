@@ -5,9 +5,12 @@ import Invoice from "../models/invoiceSchema";
 import MonthlyReport from "../models/montlyReportSchema";
 import mongoose from "mongoose";
 
-// When the company pays the VAT, it comes out of each line's service charge
+// When the company pays a line's VAT, it comes out of that line's service charge.
+// Each line carries its own flag; lines without one fall back to the bill-level flag.
 export const reduceVatFromItems = (items: any[], vatPaidByCompany: boolean) =>
-  vatPaidByCompany ? items.map((item: any) => ({ ...item, serviceCharge: item.serviceCharge - item.tax })) : items;
+  items.map((item: any) =>
+    item.vatPaidByCompany ?? vatPaidByCompany ? { ...item, serviceCharge: item.serviceCharge - item.tax } : item,
+  );
 
 export const createInvoiceDB = async (invoiceData: any, { reduceVat = true } = {}) => {
   const lastInvoice = await Invoice.findOne().sort({ invoice_number: -1 });

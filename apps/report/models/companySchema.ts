@@ -8,6 +8,8 @@ const CompanySchema = new Schema({
   address: { type: Object },
   expiryDate: { type: String },
   isActive: { type: Boolean, default: true },
+  // reusable quotation terms; left unset until the company first edits its list
+  quotationTerms: { type: [String], default: undefined },
   createdAt: { type: String },
   updatedAt: { type: String },
 });
