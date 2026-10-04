@@ -31,6 +31,10 @@ import {
   getProformas,
   getProformaById,
   convertProforma,
+  getCvTemplates,
+  createCvTemplate,
+  updateCvTemplate,
+  deleteCvTemplate,
 } from "./controller";
 import { authenticateToken } from "../utils/authMiddleware";
 // import { authMiddleware } from "../utils/authMiddleware";
@@ -69,6 +73,10 @@ reportRouter.get("/quotationterms", getQuotationTerms);
 reportRouter.post("/quotationterms", addQuotationTerm);
 reportRouter.delete("/quotationterms", deleteQuotationTerm);
 reportRouter.post("/invoice/:invoiceId/send-email", sendInvoiceEmail);
+reportRouter.get("/cvtemplates", getCvTemplates);
+reportRouter.post("/cvtemplates", createCvTemplate);
+reportRouter.put("/cvtemplates/:templateId", updateCvTemplate);
+reportRouter.delete("/cvtemplates/:templateId", deleteCvTemplate);
 // reportRouter.delete("/deleteservice/:serviceId", getQuotitions);
 // reportRouter.get("/:id", getInvoiceById);
 // reportRouter.get("/:id", getInvoiceById);

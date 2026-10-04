@@ -11,6 +11,8 @@ import { createQuotationDB, QuotationValidationError } from "./services/quotatio
 import { describeMailError, MailNotConfiguredError, sendMail } from "../utils/mailer";
 import Proforma from "./models/proformaSchema";
 import { convertProformaDB, createProformaDB, ProformaStateError, ProformaValidationError } from "./services/proforma";
+import CvTemplate from "./models/cvTemplateSchema";
+import { createCvTemplateDB, CvTemplateValidationError, updateCvTemplateDB } from "./services/cvTemplate";
 
 export const createInvoice = async (req: AuthRequest, res: Response) => {
   try {
@@ -513,5 +515,59 @@ export const convertProforma = async (req: AuthRequest, res: Response) => {
     }
     console.error("Convert proforma error:", err);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getCvTemplates = async (req: AuthRequest, res: Response) => {
+  try {
+    const templates = await CvTemplate.find({ companyId: req.companyId }).sort({ name: 1 });
+    res.status(200).json({ message: "CV templates fetched successfully", data: templates });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const createCvTemplate = async (req: AuthRequest, res: Response) => {
+  try {
+    const template = await createCvTemplateDB({ companyId: req.companyId, userId: req.userId, data: req.body });
+    res.status(201).json({ message: "Template saved successfully", data: template });
+  } catch (err) {
+    if (err instanceof CvTemplateValidationError) {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const updateCvTemplate = async (req: AuthRequest, res: Response) => {
+  try {
+    const { templateId } = req.params;
+    const template = mongoose.isValidObjectId(templateId)
+      ? await updateCvTemplateDB({ templateId, companyId: req.companyId, data: req.body })
+      : null;
+    if (!template) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+    res.status(200).json({ message: "Template saved successfully", data: template });
+  } catch (err) {
+    if (err instanceof CvTemplateValidationError) {
+      return res.status(400).json({ message: err.message });
+    }
+    res.status(500).json({ message: "Internal server error", error: err });
+  }
+};
+
+export const deleteCvTemplate = async (req: AuthRequest, res: Response) => {
+  try {
+    const { templateId } = req.params;
+    const template = mongoose.isValidObjectId(templateId)
+      ? await CvTemplate.findOneAndDelete({ _id: templateId, companyId: req.companyId })
+      : null;
+    if (!template) {
+      return res.status(404).json({ message: "Template not found" });
+    }
+    res.status(200).json({ message: "Template deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error", error: err });
   }
 };
